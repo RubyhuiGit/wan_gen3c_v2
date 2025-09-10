@@ -167,7 +167,6 @@ class Dataset10KTestInfo():
             frame_info["cache_w2cs"] = np.stack(cache_w2cs, axis=0)
             frame_info["cache_intrinsics"] = np.stack(cache_intrinsics, axis=0)
             frame_info["cache_depths"] = np.stack(cache_depths, axis=0)
-            frame_info["first_frame"] = data_info["frames"][0]
 
             N, H, W, _ = data_info["frames"].shape
             frame_info["num_frames"] = N
