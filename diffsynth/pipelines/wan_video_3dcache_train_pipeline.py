@@ -1270,6 +1270,52 @@ def model_fn_wan_video(
     fuse_vae_embedding_in_latents: bool = False,
     **kwargs,
 ):
+    if sliding_window_size is not None and sliding_window_stride is not None:
+        model_kwargs = dict(
+            dit=dit,
+            motion_controller=motion_controller,
+            vace=vace,
+            latents=latents,
+            timestep=timestep,
+            context=context,
+            clip_feature=clip_feature,
+            y=y,
+            reference_latents=reference_latents,
+            vace_context=vace_context,
+            vace_scale=vace_scale,
+            tea_cache=tea_cache,
+            use_unified_sequence_parallel=use_unified_sequence_parallel,
+            motion_bucket_id=motion_bucket_id,
+        )
+        return TemporalTiler_BCTHW().run(
+            model_fn_wan_video,
+            sliding_window_size, sliding_window_stride,
+            latents.device, latents.dtype,
+            model_kwargs=model_kwargs,
+            tensor_names=["latents", "y"],
+            batch_size=2 if cfg_merge else 1
+        )
+    # wan2.2 s2v
+    if audio_embeds is not None:
+        return model_fn_wans2v(
+            dit=dit,
+            latents=latents,
+            timestep=timestep,
+            context=context,
+            audio_embeds=audio_embeds,
+            motion_latents=motion_latents,
+            s2v_pose_latents=s2v_pose_latents,
+            drop_motion_frames=drop_motion_frames,
+            use_gradient_checkpointing_offload=use_gradient_checkpointing_offload,
+            use_gradient_checkpointing=use_gradient_checkpointing,
+            use_unified_sequence_parallel=use_unified_sequence_parallel,
+        )
+
+    if use_unified_sequence_parallel:
+        import torch.distributed as dist
+        from xfuser.core.distributed import (get_sequence_parallel_rank,
+                                            get_sequence_parallel_world_size,
+                                            get_sp_group)
     # Timestep
     if dit.seperated_timestep and fuse_vae_embedding_in_latents:
         timestep = torch.concat([
