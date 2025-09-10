@@ -19,7 +19,7 @@ pipe = WanVideo3DCacheTestPipeline.from_pretrained(
     ],
 )
 # 加载训练好的vace
-vace_state_dict = load_state_dict_from_safetensors("/root/autodl-tmp/output/epoch-1.safetensors")
+vace_state_dict = load_state_dict_from_safetensors("/root/autodl-tmp/output/epoch-0.safetensors")
 pipe.vace_from_pretrained(vace_state_dict)
 pipe.enable_vram_management()
 

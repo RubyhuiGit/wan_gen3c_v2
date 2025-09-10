@@ -38,6 +38,7 @@ class Dataset10KParse:
                 print(f"Image file {img_path} does not exist.")
                 continue
             frame = cv2.imread(img_path)        # 图像
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             # c2w
             transform_matrix = frame_info["transform_matrix"]
