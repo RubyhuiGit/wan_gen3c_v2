@@ -539,6 +539,20 @@ def launch_training_task(
         find_unused_parameters = args.find_unused_parameters
     
     optimizer = torch.optim.AdamW(model.trainable_modules(), lr=learning_rate, weight_decay=weight_decay)
+    # trainable_params = model.trainable_param_names()
+    # log_file = open("/root/train_params.json", 'w')
+    # for item in sorted(list(trainable_params)):
+    #     print(item, file=log_file)                      # 打印设置了grad=True的参数   
+    # param_id_to_name_map = {id(p): name for name, p in model.named_parameters()} 
+    # params_in_optimizer_names = set()
+    # for param_group in optimizer.param_groups:
+    #     for param in param_group['params']:
+    #         param_id = id(param)
+    #         if param_id in param_id_to_name_map:
+    #             params_in_optimizer_names.add(param_id_to_name_map[param_id])
+    #     for name in sorted(list(params_in_optimizer_names)):
+    #         print(name)
+    
     scheduler = torch.optim.lr_scheduler.ConstantLR(optimizer)
     dataloader = torch.utils.data.DataLoader(dataset, shuffle=True, collate_fn=lambda x: x[0], num_workers=num_workers)
     accelerator = Accelerator(
@@ -617,8 +631,10 @@ def wan_parser():
     parser.add_argument("--min_timestep_boundary", type=float, default=0.0, help="Min timestep boundary (for mixed models, e.g., Wan-AI/Wan2.2-I2V-A14B).")
     parser.add_argument("--find_unused_parameters", default=False, action="store_true", help="Whether to find unused parameters in DDP.")
     parser.add_argument("--save_steps", type=int, default=None, help="Number of checkpoint saving invervals. If None, checkpoints will be saved every epoch.")
-    parser.add_argument("--dataset_num_workers", type=int, default=0, help="Number of workers for data loading.")
+    parser.add_argument("--dataset_num_workers", type=int, default=4, help="Number of workers for data loading.")
     parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay.")
+    parser.add_argument("--cache_index", type=int, nargs='+', help="3d cache index")
+    parser.add_argument("--use_waymo_datasets", default=False, action="store_true", help="Whether to use Waymo datasets.")
     return parser
 
 
