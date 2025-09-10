@@ -6,6 +6,7 @@ from diffsynth.trainers.unified_dataset import UnifiedDataset
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 from data.dataset_10k import Dataset10K
+from data.vipe_dataset import VipeDatasets
 
 class WanTrainingModule(DiffusionTrainingModule):
     def __init__(
@@ -114,12 +115,17 @@ if __name__ == "__main__":
     parser = wan_parser()
     args = parser.parse_args()
     if args.use_waymo_datasets:
-        raise NotImplementedError("Waymo dataset is not implemented yet.")
+        dataset = VipeDatasets(args.dataset_base_path,
+                               args.num_frames,
+                               args.cache_index,
+                               args.dataset_repeat,
+                               args.read_num_thread)
     else:
         dataset = Dataset10K(args.dataset_base_path,
                              args.num_frames,
                              args.cache_index,
                              args.dataset_repeat)
+                             
     model = WanTrainingModule(
         model_paths=args.model_paths,
         model_id_with_origin_paths=args.model_id_with_origin_paths,

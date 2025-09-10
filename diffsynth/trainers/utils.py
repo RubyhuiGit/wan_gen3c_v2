@@ -635,6 +635,7 @@ def wan_parser():
     parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay.")
     parser.add_argument("--cache_index", type=int, nargs='+', help="3d cache index")
     parser.add_argument("--use_waymo_datasets", default=False, action="store_true", help="Whether to use Waymo datasets.")
+    parser.add_argument("--read_num_thread", type=int, default=4, help="Datasets Read Thread.")
     return parser
 
 

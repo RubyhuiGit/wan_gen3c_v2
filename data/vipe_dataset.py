@@ -33,6 +33,7 @@ class VipeDatasets(torch.utils.data.Dataset):
         self.repeat = repeat_num
 
         self.read_num_thread = read_num_thread
+        self.load_from_cache = False
 
     def get_batch(self, idx):
         json_data_info = self.dataset[idx % len(self.dataset)]
@@ -92,7 +93,7 @@ class VipeDatasets(torch.utils.data.Dataset):
             try:
                 data_info, text, file_type, dataset_dir = self.get_batch(idx)
                 sample = data_info
-                sample["text"] = text
+                sample["prompt"] = text
                 sample["data_type"] = file_type
                 sample["idx"] = idx
                 sample["file_name"] = dataset_dir

@@ -6,7 +6,6 @@ from modelscope import dataset_snapshot_download
 from diffsynth.models.utils import load_state_dict_from_safetensors
 
 from data.dataset_10k import Dataset10KTestInfo
-from data.vipe_dataset import VipeDatasetsTestInfo
 
 # 屏蔽，不加载原来的vace
 pipe = WanVideo3DCacheTestPipeline.from_pretrained(
@@ -29,9 +28,7 @@ if not use_waymo_datasets:
     cache_index = [0, 20]     # 要指定用来创建3d cache的frame_index
     test_info = Dataset10KTestInfo(test_path, cache_index, sample_frames_num=21, max_frame_num=21).get_data_dict()
 else:
-    test_path = "/root/autodl-tmp/waymo_datasets_vipe_output/segment-10072231702153043603_5725_000_5745_000_with_camera_labels"
-    cache_index = [0, 20]     # 要指定用来创建3d cache的frame_index
-    test_info = VipeDatasetsTestInfo(data_root=test_path, cache_index=cache_index, sample_frames_num=21).get_data_dict()
+    raise NotImplementedError
 
 
 video = pipe(

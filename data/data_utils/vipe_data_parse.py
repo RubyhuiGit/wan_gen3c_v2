@@ -8,6 +8,7 @@ import torch.nn.functional as F
 
 import open3d as o3d
 import random
+from decord import VideoReader
 
 def _center_crop(tensor_bchw: torch.Tensor, crop_h: int, crop_w: int) -> torch.Tensor:
     _, _, h, w = tensor_bchw.shape
@@ -182,12 +183,6 @@ def load_vipe_data(
     video_idx: int = 0,
 ):
     mp4_path, depth_zip, pose_npz, intr_npz, mask_zip = _find_clip_paths(vipe_root_or_mp4, video_idx=video_idx)
-
-    # Read the sequence of RGB frames
-    try:
-        from decord import VideoReader  # type: ignore
-    except ImportError as e:
-        raise ImportError("decord is required to read VIPE rgb mp4") from e
     vr = VideoReader(mp4_path, num_threads=num_thread)
     total_len = len(vr)
 
