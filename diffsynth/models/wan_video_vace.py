@@ -2,6 +2,11 @@ import torch
 from .wan_video_dit import DiTBlock
 from .utils import hash_state_dict_keys
 
+def zero_module(module):
+    for p in module.parameters():
+        nn.init.zeros_(p)
+    return module
+
 class VaceWanAttentionBlock(DiTBlock):
     def __init__(self, has_image_input, dim, num_heads, ffn_dim, eps=1e-6, block_id=0):
         super().__init__(has_image_input, dim, num_heads, ffn_dim, eps=eps)
@@ -43,12 +48,13 @@ class VaceWanModel(torch.nn.Module):
 
         # vace blocks
         self.vace_blocks = torch.nn.ModuleList([
-            VaceWanAttentionBlock(has_image_input, dim, num_heads, ffn_dim, eps, block_id=i)
+            zero_module(VaceWanAttentionBlock(has_image_input, dim, num_heads, ffn_dim, eps, block_id=i))
             for i in self.vace_layers
         ])
 
         # vace patch embeddings
-        self.vace_patch_embedding = torch.nn.Conv3d(vace_in_dim, dim, kernel_size=patch_size, stride=patch_size)
+        self.vace_patch_embedding = zero_module(
+                torch.nn.Conv3d(vace_in_dim, dim, kernel_size=patch_size, stride=patch_size))
 
     # 
     def forward(
