@@ -13,7 +13,7 @@ class VaceWanAttentionBlock(DiTBlock):
         self.block_id = block_id
         if block_id == 0:
             self.before_proj = torch.nn.Linear(self.dim, self.dim)
-        self.after_proj = torch.nn.Linear(self.dim, self.dim)
+        self.after_proj = zero_module(torch.nn.Linear(self.dim, self.dim))
 
     def forward(self, c, x, context, t_mod, freqs):
         if self.block_id == 0:
@@ -48,7 +48,7 @@ class VaceWanModel(torch.nn.Module):
 
         # vace blocks
         self.vace_blocks = torch.nn.ModuleList([
-            zero_module(VaceWanAttentionBlock(has_image_input, dim, num_heads, ffn_dim, eps, block_id=i))
+            VaceWanAttentionBlock(has_image_input, dim, num_heads, ffn_dim, eps, block_id=i)
             for i in self.vace_layers
         ])
 
