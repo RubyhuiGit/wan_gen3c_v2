@@ -125,7 +125,7 @@ if __name__ == "__main__":
                              args.num_frames,
                              args.cache_index,
                              args.dataset_repeat)
-    print("///////////////////////////////////////test1///////////////////////////////")             
+    print("///////////////////////////////////////test2///////////////////////////////")             
     model = WanTrainingModule(
         model_paths=args.model_paths,
         model_id_with_origin_paths=args.model_id_with_origin_paths,

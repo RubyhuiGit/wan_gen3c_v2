@@ -367,7 +367,7 @@ class WanVideo3DCacheTestPipeline(BasePipeline):
         pipe.motion_controller = model_manager.fetch_model("wan_video_motion_controller")
         
         # pipe.vace = model_manager.fetch_model("wan_video_vace")
-        pipe.vace = VaceWanModel(vace_in_dim=96).to(device).to(torch_dtype)
+        pipe.vace = VaceWanModel(vace_in_dim=34).to(device).to(torch_dtype)
 
         pipe.audio_encoder = model_manager.fetch_model("wans2v_audio_encoder")
 
@@ -605,18 +605,19 @@ class WanVideoUnit_3DCacheRenderTestPipe(PipelineUnit):
                                                    device=pipe.device,
                                                    tiled=tiled, 
                                                    tile_size=tile_size, 
-                                                   tile_stride=tile_stride).to(dtype=pipe.torch_dtype, device=pipe.device)   # torch.Size([1, 16, 6, 60, 80]
-            latent_condition.append(render_pixel_latents)
-        render_image_latents = torch.cat(latent_condition, dim=1)     # torch.Size([1, 32, 6, 60, 80])
-        
-        vace_video_mask = torch.ones_like(masks[0][0].squeeze(1))    # torch.Size([21, 480, 640])
-        vace_video_mask = vace_video_mask.to(device=pipe.device, dtype=pipe.torch_dtype)
-        vace_mask_latents = rearrange(vace_video_mask, "T (H P) (W Q) -> 1 (P Q) T H W", P=8, Q=8)      # [1, 64, 21, 60, 80]
-        vace_mask_latents = torch.nn.functional.interpolate(vace_mask_latents, 
-                                    size=((vace_mask_latents.shape[2] + 3) // 4, 
-                                        vace_mask_latents.shape[3], 
-                                        vace_mask_latents.shape[4]), mode='nearest-exact')  # [1, 64, 6, 60, 80]
-        vace_context = torch.concat((render_image_latents, vace_mask_latents), dim=1)   # torch.Size([1, 96, 6, 60, 80])
+                                                   tile_stride=tile_stride).to(dtype=pipe.torch_dtype, device=pipe.device)   # torch.Size([1, 16, 6, 60, 80])
+
+            
+            render_mask = render_mask.to(device=pipe.device, dtype=pipe.torch_dtype)
+            render_mask = render_mask.permute(0, 2, 1, 3, 4)   # torch.Size([1, 1, 21, 480, 640])
+            render_mask = torch.nn.functional.interpolate(render_mask, 
+                                    size=((render_mask.shape[2] + 3) // 4,
+                                          render_mask.shape[3] // 8, 
+                                          render_mask.shape[4] // 8), mode='nearest-exact')  # (1, 1, 6, 60, 80)
+            render_view1 = torch.cat((render_pixel_latents, render_mask), dim=1)   # torch.Size([1, 17, 6, 60, 80])
+            latent_condition.append(render_view1)
+
+        vace_context = torch.cat(latent_condition, dim=1)     # torch.Size([1, 34, 6, 60, 80])
         return {"vace_context": vace_context, "vace_scale": vace_scale}
 
     def debug_show(self, render_imgs, render_masks):
