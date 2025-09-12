@@ -3,8 +3,11 @@ from .wan_video_dit import DiTBlock
 from .utils import hash_state_dict_keys
 
 def zero_module(module):
+    """
+    Zero out the parameters of a module and return it.
+    """
     for p in module.parameters():
-        nn.init.zeros_(p)
+        p.detach().zero_()
     return module
 
 class VaceWanAttentionBlock(DiTBlock):
@@ -13,7 +16,7 @@ class VaceWanAttentionBlock(DiTBlock):
         self.block_id = block_id
         if block_id == 0:
             self.before_proj = torch.nn.Linear(self.dim, self.dim)
-        self.after_proj = zero_module(torch.nn.Linear(self.dim, self.dim))
+        self.after_proj = torch.nn.Linear(self.dim, self.dim)
 
     def forward(self, c, x, context, t_mod, freqs):
         if self.block_id == 0:
@@ -48,7 +51,7 @@ class VaceWanModel(torch.nn.Module):
 
         # vace blocks
         self.vace_blocks = torch.nn.ModuleList([
-            VaceWanAttentionBlock(has_image_input, dim, num_heads, ffn_dim, eps, block_id=i)
+            zero_module(VaceWanAttentionBlock(has_image_input, dim, num_heads, ffn_dim, eps, block_id=i))
             for i in self.vace_layers
         ])
 
